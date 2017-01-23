@@ -207,7 +207,7 @@ const ProductVariantModel = BaseModel.extend({
 
     const variantPath = `${this.id}:${parseInt(quantity, 10)}`;
 
-    const query = `api_key=${config.apiKey}`;
+    const query = `access_token=${config.accessToken}`;
 
     return `${baseUrl}/${variantPath}?${query}`;
   }

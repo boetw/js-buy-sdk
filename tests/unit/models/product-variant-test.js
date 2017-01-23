@@ -53,7 +53,7 @@ const baseAttrs = {
 
 const config = {
   domain: 'buckets-o-stuff.myshopify.com',
-  apiKey: 'abc123'
+  accessToken: 'abc123'
 };
 
 module('Unit | ProductVariantModel', {
@@ -162,7 +162,7 @@ test('it generates checkout permalinks from passed quantity', function (assert) 
   assert.expect(4);
 
   const baseUrl = `https://${config.domain}/cart`;
-  const query = `api_key=${config.apiKey}`;
+  const query = `access_token=${config.accessToken}`;
 
   assert.equal(model.checkoutUrl(), `${baseUrl}/${model.id}:1?${query}`, 'defaults to 1');
   assert.equal(model.checkoutUrl(27), `${baseUrl}/${model.id}:27?${query}`, 'respects passed quantity');
