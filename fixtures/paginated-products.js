@@ -1,9 +1,9 @@
-export default {
+export const firstPageProductsFixture = {
   "data": {
     "shop": {
       "products": {
         "pageInfo": {
-          "hasNextPage": false,
+          "hasNextPage": true,
           "hasPreviousPage": false
         },
         "edges": [
@@ -117,7 +117,22 @@ export default {
                 ]
               }
             }
-          },
+          }
+        ]
+      }
+    }
+  }
+};
+
+export const secondPageProductsFixture = {
+  "data": {
+    "shop": {
+      "products": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "hasPreviousPage": false
+        },
+        "edges": [
           {
             "cursor": "eyJsYXN0X2lkIjo4NTMwMDMzNTQ0LCJsYXN0X3ZhbHVlIjoiODUzMDAzMzU0NCJ9",
             "node": {
@@ -229,6 +244,75 @@ export default {
                         {
                           "name": "Size",
                           "value": "very large"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+};
+
+export const thirdPageProductsFixture = {
+  "data": {
+    "shop": {
+      "products": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "hasPreviousPage": false
+        },
+        "edges": [
+          {
+            "cursor": "eyJsYXN0X2lkIjo4NjMxNzQ5NTc2LCJsYXN0X3ZhbHVlIjoiODYzMTc0OTU3NiJ9",
+            "node": {
+              "id": "gid://shopify/Product/8631749576",
+              "createdAt": "2017-02-03T18:52:27Z",
+              "updatedAt": "2017-02-03T18:52:56Z",
+              "bodyHtml": "alternative cat",
+              "handle": "cat-2",
+              "productType": "",
+              "title": "Cat 2",
+              "vendor": "sendmecats",
+              "tags": [],
+              "publishedAt": "2017-02-03T18:52:00Z",
+              "options": [
+                {
+                  "id": "gid://shopify/ProductOption/10373760392",
+                  "name": "Title",
+                  "values": [
+                    "Default Title"
+                  ]
+                }
+              ],
+              "images": {
+                "pageInfo": {
+                  "hasNextPage": false,
+                  "hasPreviousPage": false
+                },
+                "edges": []
+              },
+              "variants": {
+                "pageInfo": {
+                  "hasNextPage": false,
+                  "hasPreviousPage": false
+                },
+                "edges": [
+                  {
+                    "cursor": "eyJsYXN0X2lkIjoyOTkzNzExMjEzNn0=",
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/29937112136",
+                      "title": "Default Title",
+                      "price": "0.00",
+                      "weight": 0,
+                      "selectedOptions": [
+                        {
+                          "name": "Title",
+                          "value": "Default Title"
                         }
                       ]
                     }

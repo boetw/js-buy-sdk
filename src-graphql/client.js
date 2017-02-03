@@ -22,9 +22,21 @@ export default class Client {
     });
   }
 
+  fetchAll(type, list, lastResult, client) {
+    list.push(...lastResult.model.shop[type]);
+
+    if (!lastResult.data.shop[type].pageInfo.hasNextPage) {
+      return list;
+    }
+
+    return client.send(lastResult.model.shop[type].nextPageQuery()).then((response) => {
+      return this.fetchAll(type, list, response, client);
+    });
+  }
+
   fetchAllProducts(query = productConnectionQuery()) {
     return this.graphQLClient.send(query(this.graphQLClient)).then((response) => {
-      return response.model.shop.products;
+      return this.fetchAll('products', [], response, this.graphQLClient);
     });
   }
 
@@ -36,7 +48,7 @@ export default class Client {
 
   fetchAllCollections(query = collectionConnectionQuery()) {
     return this.graphQLClient.send(query(this.graphQLClient)).then((response) => {
-      return response.model.shop.collections;
+      return this.fetchAll('collections', [], response, this.graphQLClient);
     });
   }
 
