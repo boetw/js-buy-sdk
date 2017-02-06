@@ -6,6 +6,7 @@ import productQuery from './product-query';
 import productConnectionQuery from './product-connection-query';
 import collectionQuery from './collection-query';
 import collectionConnectionQuery from './collection-connection-query';
+import fetchAll from './fetch-all';
 
 export default class Client {
   constructor(config, GraphQLClientClass = GraphQLJSClient) {
@@ -22,21 +23,35 @@ export default class Client {
     });
   }
 
-  fetchAll(type, list, lastResult, client) {
-    list.push(...lastResult.model.shop[type]);
+  fetchAllImagesOrVariants(type, product, allImagesOrVariants, promises) {
+    if (product[type].pageInfo.hasNextPage) {
+      promises.push(this.graphQLClient.send(allImagesOrVariants.nextPageQuery()).then((result) => {
+        allImagesOrVariants.push(...result.model.node[type]);
 
-    if (!lastResult.data.shop[type].pageInfo.hasNextPage) {
-      return list;
+        return fetchAll(type, allImagesOrVariants, result, this.graphQLClient);
+      }));
     }
-
-    return client.send(lastResult.model.shop[type].nextPageQuery()).then((response) => {
-      return this.fetchAll(type, list, response, client);
-    });
   }
 
   fetchAllProducts(query = productConnectionQuery()) {
     return this.graphQLClient.send(query(this.graphQLClient)).then((response) => {
-      return this.fetchAll('products', [], response, this.graphQLClient);
+      const promises = [];
+
+      // Add all images and variants for each product
+      for (let i = 0; i < response.model.shop.products.length; i++) {
+        const productImages = response.model.shop.products[i].images;
+        const productVariants = response.model.shop.products[i].variants;
+
+        // Fetch the rest of the images for this product
+        this.fetchAllImagesOrVariants('images', response.data.shop.products.edges[i].node, productImages, promises);
+
+        // Fetch the rest of the variants for this product
+        this.fetchAllImagesOrVariants('variants', response.data.shop.products.edges[i].node, productVariants, promises);
+      }
+
+      return Promise.all(promises).then(() => {
+        return response.model.shop.products;
+      });
     });
   }
 
@@ -48,7 +63,7 @@ export default class Client {
 
   fetchAllCollections(query = collectionConnectionQuery()) {
     return this.graphQLClient.send(query(this.graphQLClient)).then((response) => {
-      return this.fetchAll('collections', [], response, this.graphQLClient);
+      return response.model.shop.collections;
     });
   }
 
