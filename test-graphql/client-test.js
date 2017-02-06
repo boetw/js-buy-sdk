@@ -222,13 +222,13 @@ suite('client-test', () => {
       .postOnce('https://paginated-variants.myshopify.com/api/graphql', secondPageVariantsFixture)
       .postOnce('https://paginated-variants.myshopify.com/api/graphql', thirdPageVariantsFixture);
 
-    return client.fetchAllProducts().then((products) => {
-      const variants = products[0].variants;
+    return client.fetchProduct('7857989384').then((product) => {
+      const variants = product.variants;
 
       assert.ok(Array.isArray(variants), 'variants is an array');
       // Each variant page fixture only contains 1 variant rather than 20 for simplicity
       assert.equal(variants.length, 3, 'all three pages of variants are returned');
-      assert.equal(variants[0].id, productWithPaginatedVariantsFixture.data.shop.products.edges[0].node.variants.edges[0].node.id);
+      assert.equal(variants[0].id, productWithPaginatedVariantsFixture.data.node.variants.edges[0].node.id);
       assert.equal(variants[1].id, secondPageVariantsFixture.data.node.variants.edges[0].node.id);
       assert.equal(variants[2].id, thirdPageVariantsFixture.data.node.variants.edges[0].node.id);
       assert.ok(fetchMock.done());

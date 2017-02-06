@@ -57,7 +57,19 @@ export default class Client {
 
   fetchProduct(id, query = productQuery()) {
     return this.graphQLClient.send(query(this.graphQLClient, id)).then((response) => {
-      return response.model.node;
+      const promises = [];
+      const productImages = response.model.node.images;
+      const productVariants = response.model.node.variants;
+
+      // Fetch the rest of the images for this product
+      this.fetchAllImagesOrVariants('images', response.data.node, productImages, promises);
+
+      // Fetch the rest of the variants for this product
+      this.fetchAllImagesOrVariants('variants', response.data.node, productVariants, promises);
+
+      return Promise.all(promises).then(() => {
+        return response.model.node;
+      });
     });
   }
 
