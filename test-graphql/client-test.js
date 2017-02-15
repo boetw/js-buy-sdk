@@ -11,9 +11,9 @@ import singleCollectionFixture from '../fixtures/collection-fixture';
 import dynamicProductFixture from '../fixtures/dynamic-product-fixture';
 import dynamicCollectionFixture from '../fixtures/dynamic-collection-fixture';
 import productWithPaginatedImagesFixture from '../fixtures/product-with-paginated-images-fixture';
-import {secondPageImagesFixture, thirdPageImagesFixture} from '../fixtures/paginated-images-fixtures';
+import {secondPageImagesFixture, thirdPageImagesFixture, emptyPageImagesFixture} from '../fixtures/paginated-images-fixtures';
 import productWithPaginatedVariantsFixture from '../fixtures/product-with-paginated-variants-fixture';
-import {secondPageVariantsFixture, thirdPageVariantsFixture} from '../fixtures/paginated-variants-fixtures';
+import {secondPageVariantsFixture, thirdPageVariantsFixture, emptyPageVariantsFixture} from '../fixtures/paginated-variants-fixtures';
 import fetchMock from './isomorphic-fetch-mock'; // eslint-disable-line import/no-unresolved
 import productQuery from '../src-graphql/product-query';
 import imageQuery from '../src-graphql/image-query';
@@ -195,7 +195,8 @@ suite('client-test', () => {
 
     fetchMock.postOnce('https://paginated-images.myshopify.com/api/graphql', productWithPaginatedImagesFixture)
       .postOnce('https://paginated-images.myshopify.com/api/graphql', secondPageImagesFixture)
-      .postOnce('https://paginated-images.myshopify.com/api/graphql', thirdPageImagesFixture);
+      .postOnce('https://paginated-images.myshopify.com/api/graphql', thirdPageImagesFixture)
+      .postOnce('https://paginated-images.myshopify.com/api/graphql', emptyPageImagesFixture);
 
     return client.fetchAllProducts().then((products) => {
       const images = products[0].images;
@@ -220,7 +221,8 @@ suite('client-test', () => {
 
     fetchMock.postOnce('https://paginated-variants.myshopify.com/api/graphql', productWithPaginatedVariantsFixture)
       .postOnce('https://paginated-variants.myshopify.com/api/graphql', secondPageVariantsFixture)
-      .postOnce('https://paginated-variants.myshopify.com/api/graphql', thirdPageVariantsFixture);
+      .postOnce('https://paginated-variants.myshopify.com/api/graphql', thirdPageVariantsFixture)
+      .postOnce('https://paginated-variants.myshopify.com/api/graphql', emptyPageVariantsFixture);
 
     return client.fetchProduct('7857989384').then((product) => {
       const variants = product.variants;

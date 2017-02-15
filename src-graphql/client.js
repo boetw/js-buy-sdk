@@ -6,7 +6,6 @@ import productQuery from './product-query';
 import productConnectionQuery from './product-connection-query';
 import collectionQuery from './collection-query';
 import collectionConnectionQuery from './collection-connection-query';
-import fetchAll from './fetch-all';
 
 export default class Client {
   constructor(config, GraphQLClientClass = GraphQLJSClient) {
@@ -23,34 +22,35 @@ export default class Client {
     });
   }
 
-  fetchAllImagesOrVariants(type, product, allImagesOrVariants, promises) {
-    if (product[type].pageInfo.hasNextPage) {
-      promises.push(this.graphQLClient.send(allImagesOrVariants.nextPageQuery()).then((result) => {
-        allImagesOrVariants.push(...result.model.node[type]);
+  fetchAll(paginatedModels) {
+    return this.graphQLClient.fetchNextPage(paginatedModels).then(({model}) => {
+      // Until we know how hasNextPage will be exposed, we query until the result is empty
+      if (model.length === 0) {
+        return paginatedModels;
+      }
 
-        return fetchAll(type, allImagesOrVariants, result, this.graphQLClient);
-      }));
-    }
+      paginatedModels.push(...model);
+
+      return this.fetchAll(paginatedModels);
+    });
   }
 
   fetchAllProducts(query = productConnectionQuery()) {
-    return this.graphQLClient.send(query(this.graphQLClient)).then((response) => {
-      const promises = [];
+    return this.graphQLClient.send(query(this.graphQLClient)).then(({model, data}) => {
+      const promises = model.shop.products.reduce((promiseAcc, product, i) => {
+        if (data.shop.products.edges[i].node.images.pageInfo.hasNextPage) {
+          promiseAcc.push(this.fetchAll(product.images));
+        }
 
-      // Add all images and variants for each product
-      for (let i = 0; i < response.model.shop.products.length; i++) {
-        const productImages = response.model.shop.products[i].images;
-        const productVariants = response.model.shop.products[i].variants;
+        if (data.shop.products.edges[i].node.variants.pageInfo.hasNextPage) {
+          promiseAcc.push(this.fetchAll(product.variants));
+        }
 
-        // Fetch the rest of the images for this product
-        this.fetchAllImagesOrVariants('images', response.data.shop.products.edges[i].node, productImages, promises);
-
-        // Fetch the rest of the variants for this product
-        this.fetchAllImagesOrVariants('variants', response.data.shop.products.edges[i].node, productVariants, promises);
-      }
+        return promiseAcc;
+      }, []);
 
       return Promise.all(promises).then(() => {
-        return response.model.shop.products;
+        return model.shop.products;
       });
     });
   }
@@ -58,14 +58,16 @@ export default class Client {
   fetchProduct(id, query = productQuery()) {
     return this.graphQLClient.send(query(this.graphQLClient, id)).then((response) => {
       const promises = [];
-      const productImages = response.model.node.images;
-      const productVariants = response.model.node.variants;
 
       // Fetch the rest of the images for this product
-      this.fetchAllImagesOrVariants('images', response.data.node, productImages, promises);
+      if (response.data.node.images.pageInfo.hasNextPage) {
+        promises.push(this.fetchAll(response.model.node.images));
+      }
 
       // Fetch the rest of the variants for this product
-      this.fetchAllImagesOrVariants('variants', response.data.node, productVariants, promises);
+      if (response.data.node.variants.pageInfo.hasNextPage) {
+        promises.push(this.fetchAll(response.model.node.variants));
+      }
 
       return Promise.all(promises).then(() => {
         return response.model.node;
