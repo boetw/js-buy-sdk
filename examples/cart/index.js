@@ -8,6 +8,7 @@ $(function() {
     appId: '6'
   });
 
+
   var product;
   var cart;
   var cartLineItemCount;
